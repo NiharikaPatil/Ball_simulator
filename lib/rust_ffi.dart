@@ -40,9 +40,10 @@ final GetBallDart getBall = rustLib.lookupFunction<GetBallC, GetBallDart>('get_b
 final GetBallCountDart getBallCount = rustLib.lookupFunction<GetBallCountC, GetBallCountDart>('get_ball_count');
 
 void executeRustFunctionality() {
-  // Example usage
+  print("In the rust_ffi");
   Pointer<Ball> ballsPtr = createBalls(10); // Create 10 balls
   moveBalls(ballsPtr, 10, 400.0, 400.0); // Move balls
   print(getBallCount(ballsPtr)); // Print number of balls
   freeBalls(ballsPtr); // Free memory
+  print("In the rust_ffi");
 }

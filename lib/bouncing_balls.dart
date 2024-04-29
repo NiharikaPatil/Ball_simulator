@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class BouncingBalls extends StatefulWidget {
   final int ballCount;
+  final List<Color> ballColors;
 
-  BouncingBalls({required this.ballCount});
+  BouncingBalls({required this.ballCount, required this.ballColors});
 
   @override
   _BouncingBallsState createState() => _BouncingBallsState();
@@ -31,9 +32,14 @@ class _BouncingBallsState extends State<BouncingBalls> {
     }
   }
 
-  void _initializeBalls() {
-    _balls = List.generate(widget.ballCount, (index) => Ball());
-  }
+
+void _initializeBalls() {
+  _balls = List.generate(widget.ballCount, (index) {
+    return Ball(color: widget.ballColors[index % widget.ballColors.length]);
+  });
+}
+
+
 
   void startTimer() {
     Timer.periodic(Duration(milliseconds: 16), (timer) {
@@ -66,8 +72,9 @@ class Ball {
   late double dy;
   final double radius = 5.0;
   final Random random = Random();
+  late Color color;
 
-  Ball() {
+  Ball({required this.color}) {
     x = random.nextDouble() * 400; //set a random value between o.o to 1.0 and then increase it by multiplying with 400
     y = random.nextDouble() * 400;
     dx = (random.nextDouble() * 4) - 2; //sets velocity between -2 to +2, we can change the velocity on the basis of your need
@@ -79,8 +86,6 @@ class Ball {
     y += dy;
     if (x <= 10 || x >= containerWidth-10) { //check the left and right boundary if the ball has hit it, subtracted 10 to give illusion of ball hitting headfirst
       dx = -dx; //for changing direction
-      //print(containerWidth);
-      //print(containerHeight);
     }
     if (y <= 10 || y >= containerHeight-10) { //same as above condition but for top and bottom
       dy = -dy;
@@ -102,6 +107,10 @@ class Ball {
   }
 }
 
+void print_aline (){
+  print("This is for the rust button");
+}
+
 class BallsPainter extends CustomPainter {
   final List<Ball> balls;
 
@@ -110,7 +119,11 @@ class BallsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (var ball in balls) {
-      canvas.drawCircle(Offset(ball.x, ball.y), ball.radius, Paint()..color = Colors.red);
+      canvas.drawCircle(
+        Offset(ball.x, ball.y),
+        ball.radius,
+        Paint()..color = ball.color, // Use the color property of each Ball
+      );
     }
   }
 
@@ -119,7 +132,6 @@ class BallsPainter extends CustomPainter {
     return true;
   }
 }
-
 
 //run it in profile mode - test it in this mode
 

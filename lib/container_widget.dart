@@ -9,6 +9,7 @@ class ContainerWidget extends StatefulWidget {
 
 class _ContainerWidgetState extends State<ContainerWidget> {
   double _ballCount = 10;
+  final List<Color> _ballColors = [Colors.red, Colors.green, Colors.blue, Colors.yellow, Colors.black]; // Define colors for layers
 
   @override
   Widget build(BuildContext context) {
@@ -16,24 +17,35 @@ class _ContainerWidgetState extends State<ContainerWidget> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
-          child: Container(
-            color: Colors.grey, 
-            child: BouncingBalls(ballCount: _ballCount.toInt()),
+          child: Stack( // Use Stack widget to layer the bouncing balls
+            children: List.generate(
+              _ballColors.length,
+              (index) => Positioned.fill(
+                child: Container(
+                  color: Colors.transparent,
+                  child: BouncingBalls(
+                    ballCount: _ballCount.toInt(),
+                    ballColors: List.generate(_ballCount.toInt(), (i) => _ballColors[index]),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
         Slider(
           value: _ballCount,
           min: 10,
-          max: 3000,
+          max: 5000,
           onChanged: (double newValue) {
             setState(() {
-              _ballCount = newValue; //everytime the slider value changes, new value for ball count is set
+              _ballCount = newValue;
             });
           },
         ),
         ElevatedButton(
           onPressed: () {
-            //the code to rust implementation will be added here
+            print_aline();
+            executeRustFunctionality();
           },
           child: Text('Rust'),
         ),
@@ -41,6 +53,5 @@ class _ContainerWidgetState extends State<ContainerWidget> {
     );
   }
 }
-
 
 //have a large virtual screen but show a part of it on emulator
