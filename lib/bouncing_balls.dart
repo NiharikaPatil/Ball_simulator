@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:ffi' as ffi;
 import 'ball.dart'; // Ensure this file defines the Ball struct
 import 'rust_ffi.dart'; // Contains FFI bindings
+import 'dart:ui' as ui; // For using low-level painting
 
 class BouncingBalls extends StatefulWidget {
   final int ballCount;
@@ -39,12 +40,16 @@ class _BouncingBallsState extends State<BouncingBalls> with SingleTickerProvider
       dx: (Random().nextDouble() * 4.0) - 2.0,
       dy: (Random().nextDouble() * 4.0) - 2.0,
       color: widget.ballColors[index % widget.ballColors.length], // Default color or modify as needed
+      isRustUpdated: widget.useRust, // Indicates if the ball is updated by Rust
     ));
     _controller = AnimationController(
       duration: const Duration(seconds: 10),
       vsync: this,
-    )..addListener(_updateBalls)
-      ..repeat();
+    )..addListener(() {
+      if (_balls.isNotEmpty) {
+        _updateBalls();
+      }
+    })..repeat();
     if (widget.useRust) {
       ballsPtr = rustFFI.initializeBalls(widget.ballCount, widget.ballColorsRust.length);
     }
@@ -71,6 +76,7 @@ class _BouncingBallsState extends State<BouncingBalls> with SingleTickerProvider
           dx: ball.dx,
           dy: ball.dy,
           color: widget.ballColorsRust[ball.colorIndex % widget.ballColorsRust.length],
+          isRustUpdated: true,
         );
       });
     });
@@ -79,16 +85,22 @@ class _BouncingBallsState extends State<BouncingBalls> with SingleTickerProvider
   void moveDartBalls() {
     setState(() {
       for (var ball in _balls) {
-        ball.move(context.size!.width, context.size!.height, _balls);
+        if (!ball.isRustUpdated) { 
+          ball.move(context.size!.width, context.size!.height, _balls);
+        }
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: BallsPainter(_balls),
-      size: Size.infinite,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return CustomPaint(
+          painter: BallsPainter(_balls),
+          size: MediaQuery.of(context).size,
+        );
+      },
     );
   }
 
@@ -106,7 +118,7 @@ class BallPainter {
   double x, y, dx, dy;
   Color color;
   final double radius = 5.0;
-
+  bool isRustUpdated;
 
   BallPainter({
     required this.x,
@@ -114,6 +126,7 @@ class BallPainter {
     required this.dx,
     required this.dy,
     required this.color,
+    required this.isRustUpdated,
   });
 
   void move(double containerWidth, double containerHeight, List<BallPainter> balls) {
@@ -122,16 +135,16 @@ class BallPainter {
     if (x <= 10 || x >= containerWidth - 10) dx = -dx;
     if (y <= 10 || y >= containerHeight - 10) dy = -dy;
     for (var ball in balls) {
-      if (ball != this) { //checks for self collision
-        double dist = sqrt(pow(x - ball.x, 2) + pow(y - ball.y, 2)); //calculation of distance between two balls that are in vicinity to check for collision
-        if (dist <= radius * 2) { // Balls are colliding
+      if (ball != this) {
+        double dist = sqrt(pow(x - ball.x, 2) + pow(y - ball.y, 2));
+        if (dist <= radius * 2) {
           double tempDx = dx;
           double tempDy = dy;
           dx = ball.dx;
           dy = ball.dy;
           ball.dx = tempDx;
           ball.dy = tempDy;
-          break; // Exit loop after handling collision with one ball
+          break;
         }
       }
     }
@@ -146,8 +159,22 @@ class BallsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (var ball in balls) {
-      Paint paint = Paint()..color = ball.color;
-      canvas.drawCircle(Offset(ball.x, ball.y), 5.0, paint);
+      Paint paint = Paint();
+      if (!ball.isRustUpdated) {
+        // Apply shader only to Dart updated balls
+        final shader = ui.Gradient.radial(
+          Offset(ball.x, ball.y),
+          ball.radius,
+          [Colors.white, ball.color],
+          [0.1, 1.0],
+          TileMode.mirror,
+        );
+        paint.shader = shader;
+      } else {
+        // Rust updated balls get a simple color
+        paint.color = ball.color;
+      }
+      canvas.drawCircle(Offset(ball.x, ball.y), ball.radius, paint);
     }
   }
 
