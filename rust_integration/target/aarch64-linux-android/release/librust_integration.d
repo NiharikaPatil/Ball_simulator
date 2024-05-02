@@ -1,0 +1,1 @@
+/Users/niharika/Documents/Test_app/flutter_application_1/rust_integration/target/aarch64-linux-android/release/librust_integration.so: /Users/niharika/Documents/Test_app/flutter_application_1/rust_integration/src/lib.rs

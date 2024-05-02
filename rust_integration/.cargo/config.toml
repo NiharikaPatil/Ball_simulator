@@ -1,0 +1,2 @@
+[target.aarch64-linux-android]
+linker = "/Users/niharika/Library/Android/sdk/ndk/27.0.11718014/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android21-clang"

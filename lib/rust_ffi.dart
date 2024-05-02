@@ -1,49 +1,45 @@
-
-import 'dart:ffi'; // Import dart:ffi library
-import 'dart:io' show Platform; // Import Platform for platform-specific dynamic library loading
+import 'dart:ffi';
+import 'dart:io' show Platform;
 import 'package:ffi/ffi.dart';
+import 'ball.dart';  // Ensure this contains the structure for Ball
 
-final class Ball extends Struct {
-  @Double()
-  external double x;
-  @Double()
-  external double y;
-  @Double()
-  external double dx;
-  @Double()
-  external double dy;
+final class Balls extends Struct {
+  external Pointer<Ball> ptr;
+  @Uint64()
+  external int count;
 }
 
-typedef MoveBallsC = Void Function(Pointer<Ball>, IntPtr, Double, Double);
-typedef MoveBallsDart = void Function(Pointer<Ball>, int, double, double);
+typedef CreateBallsC = Pointer<Balls> Function(Uint64, Int32);
+typedef CreateBallsDart = Pointer<Balls> Function(int, int);
 
-typedef CreateBallsC = Pointer<Ball> Function(IntPtr);
-typedef CreateBallsDart = Pointer<Ball> Function(int);
+typedef MoveBallsC = Void Function(Pointer<Balls>, Double, Double);
+typedef MoveBallsDart = void Function(Pointer<Balls>, double, double);
 
-typedef FreeBallsC = Void Function(Pointer<Ball>);
-typedef FreeBallsDart = void Function(Pointer<Ball>);
+typedef FreeBallsC = Void Function(Pointer<Balls>);
+typedef FreeBallsDart = void Function(Pointer<Balls>);
 
-typedef GetBallC = Pointer<Ball> Function(Pointer<Ball>, IntPtr);
-typedef GetBallDart = Pointer<Ball> Function(Pointer<Ball>, int);
+class RustFFI {
+  late final DynamicLibrary rustLib;
+  late final CreateBallsDart createBalls;
+  late final MoveBallsDart moveBalls;
+  late final FreeBallsDart freeBalls;
 
-typedef GetBallCountC = IntPtr Function(Pointer<Ball>);
-typedef GetBallCountDart = int Function(Pointer<Ball>);
+  RustFFI() {
+    rustLib = DynamicLibrary.open('librust_integration.so');
+    createBalls = rustLib.lookupFunction<CreateBallsC, CreateBallsDart>('create_balls');
+    moveBalls = rustLib.lookupFunction<MoveBallsC, MoveBallsDart>('move_balls');
+    freeBalls = rustLib.lookupFunction<FreeBallsC, FreeBallsDart>('free_balls');
+  }
 
-final DynamicLibrary rustLib = Platform.isAndroid
-    ? DynamicLibrary.open('/Users/niharika/Documents/Test_app/flutter_application_1/rust_integration/target/release/librust_integration.dylib') // Android dynamic library
-    : DynamicLibrary.process(); // iOS dynamic library
+  Pointer<Balls> initializeBalls(int ballCount, int colorCount) {
+    return createBalls(ballCount, colorCount);
+  }
 
-final MoveBallsDart moveBalls = rustLib.lookupFunction<MoveBallsC, MoveBallsDart>('move_balls');
-final CreateBallsDart createBalls = rustLib.lookupFunction<CreateBallsC, CreateBallsDart>('create_balls');
-final FreeBallsDart freeBalls = rustLib.lookupFunction<FreeBallsC, FreeBallsDart>('free_balls');
-final GetBallDart getBall = rustLib.lookupFunction<GetBallC, GetBallDart>('get_ball');
-final GetBallCountDart getBallCount = rustLib.lookupFunction<GetBallCountC, GetBallCountDart>('get_ball_count');
+  void updateBallPositions(Pointer<Balls> ballsPtr, double width, double height) {
+    moveBalls(ballsPtr, width, height);
+  }
 
-void executeRustFunctionality() {
-  print("In the rust_ffi");
-  Pointer<Ball> ballsPtr = createBalls(10); // Create 10 balls
-  moveBalls(ballsPtr, 10, 400.0, 400.0); // Move balls
-  print(getBallCount(ballsPtr)); // Print number of balls
-  freeBalls(ballsPtr); // Free memory
-  print("In the rust_ffi");
+  void disposeBalls(Pointer<Balls> ballsPtr) {
+    freeBalls(ballsPtr);
+  }
 }

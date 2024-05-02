@@ -8,8 +8,16 @@ class ContainerWidget extends StatefulWidget {
 }
 
 class _ContainerWidgetState extends State<ContainerWidget> {
-  double _ballCount = 10;
-  final List<Color> _ballColors = [Colors.red, Colors.green, Colors.blue, Colors.yellow, Colors.black]; // Define colors for layers
+  double _ballCount = 100;
+  bool _useRust = false;
+  final List<Color> _ballColors = [Colors.red, Colors.green, Colors.blue, Colors.yellow, Colors.black];
+  final List<Color> _ballColorsRust = [Colors.brown, Colors.orange, Colors.purple, Colors.pink, Colors.grey];
+
+  void _toggleRustUsage() {
+    setState(() {
+      _useRust = !_useRust;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +25,16 @@ class _ContainerWidgetState extends State<ContainerWidget> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
-          child: Stack( // Use Stack widget to layer the bouncing balls
+          child: Stack(
             children: List.generate(
               _ballColors.length,
               (index) => Positioned.fill(
-                child: Container(
-                  color: Colors.transparent,
-                  child: BouncingBalls(
-                    ballCount: _ballCount.toInt(),
-                    ballColors: List.generate(_ballCount.toInt(), (i) => _ballColors[index]),
-                  ),
+                child: BouncingBalls(
+                  key: UniqueKey(), // Important: Ensures the widget rebuilds when key changes
+                  ballCount: _ballCount.toInt(),
+                  ballColors: _ballColors,
+                  ballColorsRust: _ballColorsRust,
+                  useRust: _useRust,
                 ),
               ),
             ),
@@ -34,24 +42,24 @@ class _ContainerWidgetState extends State<ContainerWidget> {
         ),
         Slider(
           value: _ballCount,
-          min: 10,
+          min: 100,
           max: 5000,
+          divisions: 49,
+          label: '$_ballCount',
           onChanged: (double newValue) {
             setState(() {
               _ballCount = newValue;
             });
           },
         ),
-        ElevatedButton(
-          onPressed: () {
-            print_aline();
-            executeRustFunctionality();
+        SwitchListTile(
+          title: Text("Use Rust for computation"),
+          value: _useRust,
+          onChanged: (bool value) {
+            _toggleRustUsage();
           },
-          child: Text('Rust'),
         ),
       ],
     );
   }
 }
-
-//have a large virtual screen but show a part of it on emulator
