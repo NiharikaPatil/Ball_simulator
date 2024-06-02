@@ -2,7 +2,7 @@
 use rand::Rng;
 use std::mem;
 use std::slice;
-use std::os::raw::{c_double, c_int};
+//use std::os::raw::{c_double, c_int};
 
 #[repr(C)]
 pub struct Ball {

@@ -137,7 +137,8 @@ class BallPainter {
     for (var ball in balls) {
       if (ball != this) {
         double dist = sqrt(pow(x - ball.x, 2) + pow(y - ball.y, 2));
-        if (dist <= radius * 2) {
+        double minDist = radius + ball.radius + 2;
+        if (dist <= minDist) {
           double tempDx = dx;
           double tempDy = dy;
           dx = ball.dx;
