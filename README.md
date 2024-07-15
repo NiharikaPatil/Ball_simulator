@@ -1,16 +1,32 @@
-# flutter_application_1
+# Bouncing Balls Flutter App with Rust FFI and Forge2D
 
-A new Flutter project.
+This is a Flutter application that simulates bouncing balls using the Forge2D physics engine and Rust FFI for additional functionality.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Bouncing balls within a container
+- Balls react to collisions with boundaries and each other
+- Interfacing with Rust code using FFI for physics calculations
+- Separation of code into multiple files for better maintainability
 
-A few resources to get you started if this is your first Flutter project:
+## Requirements
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter SDK
+- Rust
+- Forge2D package for Flutter
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Setup Instructions
+
+### 1. Install Flutter
+
+Follow the instructions on the [Flutter website](https://flutter.dev/docs/get-started/install) to install the Flutter SDK.
+
+### 2. Install Rust
+
+Follow the instructions on the [Rust website](https://www.rust-lang.org/tools/install) to install Rust.
+
+### 3. Clone this repository
+
+```bash
+git clone https://github.com/yourusername/bouncing-balls.git
+cd bouncing-balls
