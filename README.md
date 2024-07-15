@@ -28,5 +28,5 @@ Follow the instructions on the [Rust website](https://www.rust-lang.org/tools/in
 ### 3. Clone this repository
 
 ```bash
-git clone https://github.com/yourusername/bouncing-balls.git
+git clone https://github.com/NiharikaPatil/bouncing-balls.git
 cd bouncing-balls
